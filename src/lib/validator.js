@@ -30,7 +30,7 @@ function pawnMoves(piece, board, row, column) {
   return potentials;
 }
 
-function moveDirection(piece, board, row, column, dirX, dirY) {
+function moveDirection(piece, board, row, column, dirX, dirY, single) {
   const potentials = [];
   row += dirY;
   column += dirX;
@@ -47,6 +47,9 @@ function moveDirection(piece, board, row, column, dirX, dirY) {
       potentials.push({ x: column, y: row });
       break;
     } else {
+      break;
+    }
+    if (single) {
       break;
     }
   };
@@ -80,7 +83,7 @@ function rookMoves(piece, board, row, column) {
 }
 
 function knightMoves(piece, board, row, column) {
-  const checkMoves = [
+  const allMoves = [
     { x: column + 1, y: row + 2 },
     { x: column + 1, y: row - 2 },
     { x: column - 1, y: row + 2 },
@@ -90,7 +93,33 @@ function knightMoves(piece, board, row, column) {
     { x: column - 2, y: row + 1 },
     { x: column - 2, y: row - 1 }
   ];
-  return checkMoves.filter(obj => onBoard(obj.x) && onBoard(obj.y));
+  const boardMoves = allMoves.filter(obj => onBoard(obj.x) && onBoard(obj.y));
+  const validMoves = boardMoves.filter((obj) => {
+    const checkSquare = board[obj.y][obj.x];
+    return checkSquare.player !== piece.player;
+  });
+  return validMoves;
+}
+
+function kingMoves(piece, board, row, column) {
+  const upLeft = moveDirection(piece, board, row, column, -1, -1, true);
+  const upRight = moveDirection(piece, board, row, column, 1, -1, true);
+  const downRight = moveDirection(piece, board, row, column, 1, 1, true);
+  const downLeft = moveDirection(piece, board, row, column, -1, 1, true);
+  const up = moveDirection(piece, board, row, column, 0, -1, true);
+  const left = moveDirection(piece, board, row, column, -1, 0, true);
+  const right = moveDirection(piece, board, row, column, 1, 0, true);
+  const down = moveDirection(piece, board, row, column, 0, 1, true);
+  return [
+    ...up,
+    ...left,
+    ...down,
+    ...right,
+    ...upLeft,
+    ...upRight,
+    ...downLeft,
+    ...downRight
+  ];
 }
 
 export default class Validator {
@@ -109,6 +138,9 @@ export default class Validator {
       break;
       case 'r' :
       moves = rookMoves(piece, board, row, column);
+      break;
+      case 'k' :
+      moves = kingMoves(piece, board, row, column);
       break;
       case 'q' :
       const rookStyle = rookMoves(piece, board, row, column);

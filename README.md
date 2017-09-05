@@ -1,7 +1,5 @@
 ## TO DO
 
-- Knight move validation
-- King move definition and validation
 - Highlight red, pieces that can be taken
 - Disable cursor on non turn pieces
 - Turn indicator

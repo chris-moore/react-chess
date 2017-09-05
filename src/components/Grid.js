@@ -8,7 +8,7 @@ function newTile(type = null, player) {
   const color = player === 'B' ? 'black' : 'white';
   const dom = (
     <div
-      className={`f1-l f3 mt1 mt2-l ${color} icon-${type} pointer`}
+      className={`f1-l f3 mt1 mt2-l ${color} icon-${type}`}
       onClick={() => console.log('[Grid.newTile] type: ', type)}
     ></div>
   );
@@ -27,8 +27,7 @@ function generateBoard() {
     [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
     [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
     [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
-    [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()], // extra blanks
-    //[newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W')],
+    [newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W')],
     [newTile('r', 'W'), newTile('n', 'W'), newTile('b', 'W'), newTile('q', 'W'), newTile('k', 'W'), newTile('b', 'W'), newTile('n', 'W'), newTile('r', 'W')]
   ];
 }
@@ -94,9 +93,11 @@ class Grid extends Component {
   }
   render() {
     const { board, moves, selectedSquare, turn } = this.state;
+    const playerTurn = turn === 'W' ? 'Whites move' : 'Blacks move';
 
     return (
       <div className="grid">
+        <h3>{playerTurn}</h3>
         <div className="mv4 center tc ">
           {
             board.map((row, indexY) => {
@@ -107,9 +108,10 @@ class Grid extends Component {
                     const squareX = selectedSquare.x;
                     const squareY = selectedSquare.y;
                     const move = find(moves, { x: indexX, y: indexY });
+                    const playerStyle = turn === tile.player ? 'pointer' : '';
                     let bgColor = (indexX + (indexY % 2)) % 2 ? 'bg-gray' : 'bg-light-silver';
                     if (move) {
-                      bgColor = 'bg-light-blue';
+                      bgColor = 'bg-light-blue pointer';
                     }
                     if (squareX === indexX && squareY === indexY) {
                       bgColor = 'bg-blue';
@@ -118,8 +120,10 @@ class Grid extends Component {
                       <div
                         key={key}
                         onClick={() => this.clickSquare(tile, indexY, indexX, move)}
-                        className={`dib f7 w3-l w2 h3-l h2 v-mid ba b--white ${bgColor} ma0`}
-                      >{indexX} {indexY} {tile.dom}</div>
+                        className={`dib f7 w3-l w2 h3-l h2 v-mid ba b--white ${bgColor} ma0 ${playerStyle}`}
+                      >
+                        {tile.dom}
+                      </div>
                     )}
                   )}
                 </div>
