@@ -1,3 +1,15 @@
+## TO DO
+
+- Knight move validation
+- King move definition and validation
+- Highlight red, pieces that can be taken
+- Disable cursor on non turn pieces
+- Turn indicator
+- Identify a check
+- Implement AI
+- Gray / disable board during AI move
+- Write / fix tests
+
 ![repo-banner](https://user-images.githubusercontent.com/4060187/28923990-050a32d4-782e-11e7-9da7-574ce5a8b455.png)
 
 [![CircleCI](https://circleci.com/gh/jaredpalmer/razzle/tree/master.svg?style=svg)](https://circleci.com/gh/jaredpalmer/razzle/tree/master) ![Razzle-status](https://david-dm.org/jaredpalmer/razzle.svg?path=packages/razzle) [![npm version](https://badge.fury.io/js/razzle.svg)](https://badge.fury.io/js/razzle)
@@ -8,7 +20,7 @@ Universal JavaScript applications are tough to setup. Either you buy into a fram
 
 - :fire: Universal Hot Module Replacement, so both the client and server update whenever you make edits. No annoying restarts necessary
 - Comes with your favorite ES6 JavaScript goodies (through `babel-preset-razzle`)
-- Comes with the same CSS setup as [create-react-app](https://github.com/facebookincubator/create-react-app) 
+- Comes with the same CSS setup as [create-react-app](https://github.com/facebookincubator/create-react-app)
 - Works with [React](https://github.com/facebook/react), **[Reason-React](https://github.com/jaredpalmer/razzle/tree/master/examples/with-reason-react)**, [Preact](https://github.com/developit/preact), [Inferno](https://github.com/infernojs), and [Rax](https://github.com/alibaba/rax) as well as [Angular](https://github.com/angular/angular) and [Vue](https://github.com/vuejs/vue) if that's your thing
 - Escape hatches for customization via `.babelrc` and `razzle.config.js`
 - [Jest](https://github.com/facebook/jest) test runner setup with sensible defaults via `razzle test`
@@ -32,7 +44,7 @@ Then open http://localhost:3000/ to see your app. Your console should look like 
 
 Below is a list of commands you will probably find useful.
 
-### `npm start` or `yarn start` 
+### `npm start` or `yarn start`
 
 Runs the project in development mode.   
 You can view your application at `http://localhost:3000`
@@ -59,7 +71,7 @@ By default, runs tests related to files changed since the last commit.
 
 ### Extending Babel Config
 
-Razzle comes with most of ES6 stuff you need. However, if you want to add your own babel transformations, just add a `.babelrc` file to the root of your project. 
+Razzle comes with most of ES6 stuff you need. However, if you want to add your own babel transformations, just add a `.babelrc` file to the root of your project.
 
 ```json
 {
@@ -72,7 +84,7 @@ Razzle comes with most of ES6 stuff you need. However, if you want to add your o
 
 ### Extending Webpack
 
-You can also extend the underlying webpack config. Create a file called `razzle.config.js` in your project's root. 
+You can also extend the underlying webpack config. Create a file called `razzle.config.js` in your project's root.
 
 ```js
 // razzle.config.js
@@ -80,7 +92,7 @@ You can also extend the underlying webpack config. Create a file called `razzle.
 module.exports = {
   modify: (config, {target, dev}, webpack) => {
     // do something to config
-  
+
     return config
   }
 }
@@ -99,9 +111,9 @@ module.exports = {
 
 Last but not least, if you find yourself needing a more customized setup, Razzle is _very_ forkable. There is one webpack configuration factory that is 300 lines of code, and 4 scripts (`build`, `start`, `test`, and `init`). The paths setup is shamelessly taken from [create-react-app](https://github.com/facebookincubator/create-react-app), and the rest of the code related to logging.
 
-### Environment Variables 
+### Environment Variables
 
-**The environment variables are embedded during the build time.** Since Razzle produces a static HTML/CSS/JS bundle and an equivalent static bundle for your server, it cannot possibly read them at runtime. 
+**The environment variables are embedded during the build time.** Since Razzle produces a static HTML/CSS/JS bundle and an equivalent static bundle for your server, it cannot possibly read them at runtime.
 
 - `process.env.RAZZLE_PUBLIC_DIR`: Path to the public directory.
 - `process.env.RAZZLE_ASSETS_MANIFEST`: Path to a file containing compiled asset outputs
