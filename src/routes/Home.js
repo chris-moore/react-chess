@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Link from 'react-router-dom/Link';
-import Game from '../components/Game';
+import Grid from '../components/Grid';
 
 class Home extends Component {
   render() {
@@ -8,7 +8,7 @@ class Home extends Component {
       <div className="home sans-serif pa4">
         <Link to="/win">WIN NOW</Link>
         <div className="ma3 center">
-          <Game />
+          <Grid />
         </div>
       </div>
     );

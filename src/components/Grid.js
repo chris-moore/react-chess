@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Validator from '../lib/validator';
-import ComputerPlayer from '../lib/validator';
+import ComputerPlayer from '../lib/computerPlayer';
+import delay from 'lodash/delay';
 import find from 'lodash/find';
 import filter from 'lodash/filter';
 import isMatch from 'lodash/isMatch';
@@ -41,7 +42,9 @@ class Grid extends Component {
       board: generateBoard(),
       turn: 'W',
       selectedSquare: { x: null, y: null },
-      moves: null
+      moves: null,
+      human: 'W',
+      computer: 'B'
     }
   }
   movePiece(board, currentRow, currentColumn, nextRow, nextColumn, turn) {
@@ -55,24 +58,31 @@ class Grid extends Component {
       },
       moves: null,
       board,
-      turn: turn === 'W' ? 'B': 'W'
+      turn: turn === 'W' ? 'B' : 'W'
     });
   }
   clickSquare(tile, row, column, move) {
     const { player, type } = tile;
-    const { board, moves, selectedSquare, turn } = this.state;
+    const { board, computer, human, moves, selectedSquare, turn } = this.state;
     const { x, y } = selectedSquare;
 
     // move a piece
-    if (move && selectedSquare) {
-      console.log('[Grid.clickSquare] board[row][column]: ', board[row][column]);
-      console.log('[Grid.clickSquare] board[y][x]: ', board[y][x]);
-      return this.movePiece(board, y, x, row, column, turn);
+    if (move && selectedSquare && turn === human) {
+      this.movePiece(board, y, x, row, column, turn);
 
-      // do computer move if their turn
-      if (this.state.turn === 'B') {
-
-      }
+      // do computer move right after
+      delay(() => {
+        const cpMove = ComputerPlayer.makeMove(board, computer);
+        this.movePiece(
+          board,
+          cpMove.currentRow,
+          cpMove.currentColumn,
+          cpMove.nextRow,
+          cpMove.nextColumn,
+          this.state.turn
+        );
+      }, 1000);
+      return;
     }
 
     // deselect a selected piece
@@ -96,8 +106,8 @@ class Grid extends Component {
     });
   }
   render() {
-    const { board, moves, selectedSquare, turn } = this.state;
-    const playerTurn = turn === 'W' ? 'Whites move' : 'Blacks move';
+    const { board, human, moves, selectedSquare, turn } = this.state;
+    const playerTurn = turn === 'W' ? 'White to move' : 'Black to move';
 
     return (
       <div className="grid">
@@ -105,8 +115,9 @@ class Grid extends Component {
         <div className="mv4 center tc ">
           {
             board.map((row, indexY) => {
+              const boardOpaque = turn === human ? '' : 'o-80';
               return (
-                <div key={indexY} className="">
+                <div key={indexY} className={`${boardOpaque}`}>
                   {row.map((tile, indexX) => {
                     const key = `tile${indexY}${indexX}`;
                     const squareX = selectedSquare.x;
