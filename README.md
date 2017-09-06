@@ -4,9 +4,12 @@
 - Disable cursor on non turn pieces
 - Turn indicator
 - Identify a check
+- Player selects to play as white or black
 - Implement AI
 - Gray / disable board during AI move
 - Write / fix tests
+- Implement loading of states (like take a board layout and render it)
+- Implement pawn en passant
 
 ![repo-banner](https://user-images.githubusercontent.com/4060187/28923990-050a32d4-782e-11e7-9da7-574ce5a8b455.png)
 

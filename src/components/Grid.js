@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Validator from '../lib/validator';
+import ComputerPlayer from '../lib/validator';
 import find from 'lodash/find';
 import filter from 'lodash/filter';
 import isMatch from 'lodash/isMatch';
@@ -43,32 +44,35 @@ class Grid extends Component {
       moves: null
     }
   }
+  movePiece(board, currentRow, currentColumn, nextRow, nextColumn, turn) {
+    const piece = board[currentRow][currentColumn];
+    board[currentRow][currentColumn] = newTile();
+    board[nextRow][nextColumn] = piece;
+    return this.setState({
+      selectedSquare: {
+        x: null,
+        y: null
+      },
+      moves: null,
+      board,
+      turn: turn === 'W' ? 'B': 'W'
+    });
+  }
   clickSquare(tile, row, column, move) {
     const { player, type } = tile;
     const { board, moves, selectedSquare, turn } = this.state;
     const { x, y } = selectedSquare;
-    console.log('[Grid.clickSquare] player: ' + player + ' row: ' + row +  ' column: ' + column);
-    console.log('[Grid.clickSquare] selectedSquare: ', selectedSquare);
-    console.log('[Grid.clickSquare] moves: ', moves);
-    console.log('[Grid.clickSquare] move: ', move);
 
     // move a piece
     if (move && selectedSquare) {
       console.log('[Grid.clickSquare] board[row][column]: ', board[row][column]);
       console.log('[Grid.clickSquare] board[y][x]: ', board[y][x]);
-      const piece = board[y][x];
-      board[y][x] = newTile();
-      board[row][column] = piece;
-      console.log('[Grid.clickSquare] board[row][column]: ', board[row][column]);
-      return this.setState({
-        selectedSquare: {
-          x: null,
-          y: null
-        },
-        moves: null,
-        board,
-        turn: turn === 'W' ? 'B': 'W'
-      });
+      return this.movePiece(board, y, x, row, column, turn);
+
+      // do computer move if their turn
+      if (this.state.turn === 'B') {
+
+      }
     }
 
     // deselect a selected piece
@@ -111,10 +115,10 @@ class Grid extends Component {
                     const playerStyle = turn === tile.player ? 'pointer' : '';
                     let bgColor = (indexX + (indexY % 2)) % 2 ? 'bg-gray' : 'bg-light-silver';
                     if (move) {
-                      bgColor = 'bg-light-blue pointer';
+                      bgColor = 'bg-light-blue pointer'; // this is an available move
                     }
                     if (squareX === indexX && squareY === indexY) {
-                      bgColor = 'bg-blue';
+                      bgColor = 'bg-blue'; // this is the selected piece
                     }
                     return (
                       <div
