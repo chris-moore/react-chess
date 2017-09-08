@@ -1,6 +1,7 @@
 ## TO DO
 
 - Identify a check
+- Identify a stalemate
 - Highlight red, pieces that can be taken
 - Player selects to play as white or black
 - Implement AI
