@@ -38,18 +38,22 @@ function makeDumbMove(board, player) {
 
   do {
     currentPiece = pieces[currentIndex];
-    const moves = Validator.validMoves(currentPiece, board, currentPiece.row, currentPiece.column);
+    const { row, column } = currentPiece;
+    const checkPiece = board[row][column];
+    const moves = Validator.validMoves(checkPiece, board, row, column);
     if (moves.length) {
+      console.log('[ComputerPlayer.makeDumbMove] checkPiece: ', checkPiece);
       validMove = moves[0];
     }
     currentIndex++;
   }
-  while(currentIndex < totalPieces || !validMove)
+  while(currentIndex < totalPieces || !validMove);
+  console.log('[ComputerPlayer.makeDumbMove] validMove: ', validMove);
   return {
     currentRow: currentPiece.row,
     currentColumn: currentPiece.column,
-    nextRow: validMove.y,
-    nextColumn: validMove.x
+    nextRow: validMove.row,
+    nextColumn: validMove.column
   };
 }
 

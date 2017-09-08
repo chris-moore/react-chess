@@ -1,5 +1,6 @@
 ## TO DO
 
+- Never use x, y. Only row and column. It is more understandable.
 - Highlight red, pieces that can be taken
 - Disable cursor on non turn pieces
 - Turn indicator

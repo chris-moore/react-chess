@@ -41,34 +41,45 @@ class Grid extends Component {
     this.state = {
       board: generateBoard(),
       turn: 'W',
-      selectedSquare: { x: null, y: null },
+      selectedSquare: { column: null, row: null },
       moves: null,
       human: 'W',
-      computer: 'B'
+      computer: 'B',
+      history: []
     }
   }
   movePiece(board, currentRow, currentColumn, nextRow, nextColumn, turn) {
+    const previousHistory = this.state.history;
     const piece = board[currentRow][currentColumn];
     board[currentRow][currentColumn] = newTile();
     board[nextRow][nextColumn] = piece;
     return this.setState({
       selectedSquare: {
-        x: null,
-        y: null
+        column: null,
+        row: null
       },
       moves: null,
       board,
-      turn: turn === 'W' ? 'B' : 'W'
+      turn: turn === 'W' ? 'B' : 'W',
+      history: [
+        ...previousHistory,
+        {
+          row: nextRow,
+          column: nextColumn,
+          player: piece.player,
+          type: piece.type
+        }
+      ]
     });
   }
-  clickSquare(tile, row, column, move) {
+  clickSquare(tile, clickRow, clickColumn, move) {
     const { player, type } = tile;
     const { board, computer, human, moves, selectedSquare, turn } = this.state;
-    const { x, y } = selectedSquare;
+    const { row, column } = selectedSquare;
 
     // move a piece
     if (move && selectedSquare && turn === human) {
-      this.movePiece(board, y, x, row, column, turn);
+      this.movePiece(board, row, column, clickRow, clickColumn, turn);
 
       // do computer move right after
       delay(() => {
@@ -86,11 +97,11 @@ class Grid extends Component {
     }
 
     // deselect a selected piece
-    if (turn !== player || !type || (row === y && column === x)) {
+    if (turn !== player || !type || (clickRow === row && clickColumn === column)) {
       return this.setState({
         selectedSquare: {
-          x: null,
-          y: null
+          column: null,
+          row: null
         },
         moves: null
       });
@@ -98,43 +109,43 @@ class Grid extends Component {
 
     // select a piece
     return this.setState({
-      moves: Validator.validMoves(tile, board, row, column),
+      moves: Validator.validMoves(tile, board, clickRow, clickColumn),
       selectedSquare: {
-        x: column,
-        y: row
+        column: clickColumn,
+        row: clickRow
       }
     });
   }
   render() {
-    const { board, human, moves, selectedSquare, turn } = this.state;
+    const { board, history, human, moves, selectedSquare, turn } = this.state;
     const playerTurn = turn === 'W' ? 'White to move' : 'Black to move';
 
     return (
-      <div className="grid">
+      <div className="grid relative">
         <h3>{playerTurn}</h3>
         <div className="mv4 center tc ">
           {
-            board.map((row, indexY) => {
+            board.map((row, indexRow) => {
               const boardOpaque = turn === human ? '' : 'o-80';
               return (
-                <div key={indexY} className={`${boardOpaque}`}>
-                  {row.map((tile, indexX) => {
-                    const key = `tile${indexY}${indexX}`;
-                    const squareX = selectedSquare.x;
-                    const squareY = selectedSquare.y;
-                    const move = find(moves, { x: indexX, y: indexY });
+                <div key={indexRow} className={`${boardOpaque}`}>
+                  {row.map((tile, indexColumn) => {
+                    const key = `tile${indexRow}${indexColumn}`;
+                    const squareColumn = selectedSquare.column;
+                    const squareRow = selectedSquare.row;
+                    const move = find(moves, { row: indexRow, column: indexColumn });
                     const playerStyle = turn === tile.player ? 'pointer' : '';
-                    let bgColor = (indexX + (indexY % 2)) % 2 ? 'bg-gray' : 'bg-light-silver';
+                    let bgColor = (indexRow + (indexColumn % 2)) % 2 ? 'bg-gray' : 'bg-light-silver';
                     if (move) {
                       bgColor = 'bg-light-blue pointer'; // this is an available move
                     }
-                    if (squareX === indexX && squareY === indexY) {
+                    if (squareRow === indexRow && squareColumn === indexColumn) {
                       bgColor = 'bg-blue'; // this is the selected piece
                     }
                     return (
                       <div
                         key={key}
-                        onClick={() => this.clickSquare(tile, indexY, indexX, move)}
+                        onClick={() => this.clickSquare(tile, indexRow, indexColumn, move)}
                         className={`dib f7 w3-l w2 h3-l h2 v-mid ba b--white ${bgColor} ma0 ${playerStyle}`}
                       >
                         {tile.dom}
@@ -145,6 +156,9 @@ class Grid extends Component {
               )
             })
           }
+        </div>
+        <div className="absolute-l top-0 left-0 pa4">
+          {history.map(item => <div>{item.player}: {item.type} {item.row} {item.column}</div>)}
         </div>
       </div>
     );

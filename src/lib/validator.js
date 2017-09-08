@@ -4,7 +4,7 @@ function onBoard(coordinate) {
 }
 function pawnMoves(piece, board, row, column) {
   const direction = piece.player === 'W' ? -1 : 1;
-  const forwardY = row + direction;
+  const forwardRow = row + direction;
   const left = column - 1;
   const right = column + 1;
   const forwardTwo = row + (direction * 2);
@@ -12,39 +12,41 @@ function pawnMoves(piece, board, row, column) {
   const potentials = [];
 
   // one forward
-  if (board[forwardY][column].type === null) {
-    potentials.push({ x: column, y: forwardY });
+  if (board[forwardRow][column].type === null) {
+    potentials.push({ column: column, row: forwardRow });
   }
   // opening two space
-  if (onBoard(forwardTwo) && !board[forwardTwo][column].type && initialPosition) {
-    potentials.push({ x: column, y: forwardTwo});
+  if (potentials.length && onBoard(forwardTwo) && !board[forwardTwo][column].type && initialPosition) {
+    potentials.push({ column: column, row: forwardTwo});
   }
   // take a piece to the left
-  if (onBoard(left) && onBoard(forwardY) && board[forwardY][left].type) {
-    potentials.push({ x: left, y: forwardY });
+  const leftPiece = board[forwardRow][left];
+  if (onBoard(left) && onBoard(forwardRow) && leftPiece.type && leftPiece.player !== piece.player) {
+    potentials.push({ column: left, row: forwardRow });
   }
   // take a piece to the right
-  if (onBoard(right) && onBoard(forwardY) && board[forwardY][right].type) {
-    potentials.push({ x: right, y: forwardY });
+  const rightPiece = board[forwardRow][right];
+  if (onBoard(right) && onBoard(forwardRow) && rightPiece.type && rightPiece.player !== piece.player) {
+    potentials.push({ column: right, row: forwardRow });
   }
   return potentials;
 }
 
-function moveDirection(piece, board, row, column, dirX, dirY, single) {
+function moveDirection(piece, board, row, column, dirRow, dirColumn, single) {
   const potentials = [];
-  row += dirY;
-  column += dirX;
+  row += dirRow;
+  column += dirColumn;
   while (onBoard(row) && onBoard(column)) {
     const checkSquare = board[row][column];
     // empty space
     if (!checkSquare.type) {
-      potentials.push({ x: column, y: row });
-      row += dirY;
-      column += dirX;
+      potentials.push({ column: column, row: row });
+      row += dirRow;
+      column += dirColumn;
     }
     // piece can be taken
     else if (checkSquare.player !== piece.player) {
-      potentials.push({ x: column, y: row });
+      potentials.push({ column: column, row: row });
       break;
     } else {
       break;
@@ -84,18 +86,18 @@ function rookMoves(piece, board, row, column) {
 
 function knightMoves(piece, board, row, column) {
   const allMoves = [
-    { x: column + 1, y: row + 2 },
-    { x: column + 1, y: row - 2 },
-    { x: column - 1, y: row + 2 },
-    { x: column - 1, y: row - 2 },
-    { x: column + 2, y: row + 1 },
-    { x: column + 2, y: row - 1 },
-    { x: column - 2, y: row + 1 },
-    { x: column - 2, y: row - 1 }
+    { column: column + 1, row: row + 2 },
+    { column: column + 1, row: row - 2 },
+    { column: column - 1, row: row + 2 },
+    { column: column - 1, row: row - 2 },
+    { column: column + 2, row: row + 1 },
+    { column: column + 2, row: row - 1 },
+    { column: column - 2, row: row + 1 },
+    { column: column - 2, row: row - 1 }
   ];
-  const boardMoves = allMoves.filter(obj => onBoard(obj.x) && onBoard(obj.y));
+  const boardMoves = allMoves.filter(obj => onBoard(obj.column) && onBoard(obj.row));
   const validMoves = boardMoves.filter((obj) => {
-    const checkSquare = board[obj.y][obj.x];
+    const checkSquare = board[obj.row][obj.column];
     return checkSquare.player !== piece.player;
   });
   return validMoves;
