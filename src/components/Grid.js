@@ -5,6 +5,7 @@ import delay from 'lodash/delay';
 import find from 'lodash/find';
 import filter from 'lodash/filter';
 import isMatch from 'lodash/isMatch';
+import { v4 as uuid } from 'uuid';
 
 function newTile(type = null, player) {
   const color = player === 'B' ? 'black' : 'white';
@@ -158,7 +159,7 @@ class Grid extends Component {
           }
         </div>
         <div className="absolute-l top-0 left-0 pa4">
-          {history.map(item => <div>{item.player}: {item.type} {item.row} {item.column}</div>)}
+          {history.map(item => <div key={uuid()}>{item.player}: {item.type} {item.row} {item.column}</div>)}
         </div>
       </div>
     );

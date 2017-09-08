@@ -39,11 +39,11 @@ function makeDumbMove(board, player) {
   do {
     currentPiece = pieces[currentIndex];
     const { row, column } = currentPiece;
-    const checkPiece = board[row][column];
-    const moves = Validator.validMoves(checkPiece, board, row, column);
+    const moves = Validator.validMoves(currentPiece, board, row, column);
     if (moves.length) {
-      console.log('[ComputerPlayer.makeDumbMove] checkPiece: ', checkPiece);
+      console.log('[ComputerPlayer.makeDumbMove] currentPiece: ', currentPiece);
       validMove = moves[0];
+      break;
     }
     currentIndex++;
   }

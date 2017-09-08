@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "lodash": "^4.17.4",
-    "tachyons": "^4.8.0"
+    "tachyons": "^4.8.0",
+    "uuid": "^3.1.0"
   }
 }
