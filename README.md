@@ -1,14 +1,10 @@
 ## TO DO
 
-- Never use x, y. Only row and column. It is more understandable.
-- Highlight red, pieces that can be taken
-- Disable cursor on non turn pieces
-- Turn indicator
 - Identify a check
+- Highlight red, pieces that can be taken
 - Player selects to play as white or black
 - Implement AI
-- Gray / disable board during AI move
-- Write / fix tests
+- Write tests
 - Implement loading of states (like take a board layout and render it)
 - Implement pawn en passant
 
