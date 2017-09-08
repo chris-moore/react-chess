@@ -8,7 +8,7 @@ function pawnMoves(piece, board, row, column) {
   const left = column - 1;
   const right = column + 1;
   const forwardTwo = row + (direction * 2);
-  const initialPosition = (piece.player === 'B' && row === 1) || (piece.player === 'W' && row === 6);
+  const initialPosition = !piece.history.length;
   const potentials = [];
 
   // one forward

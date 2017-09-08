@@ -18,6 +18,7 @@ function newTile(type = null, player) {
   return {
     type,
     player,
+    history: [],
     dom
   }
 }
@@ -52,6 +53,14 @@ class Grid extends Component {
   movePiece(board, currentRow, currentColumn, nextRow, nextColumn, turn) {
     const previousHistory = this.state.history;
     const piece = board[currentRow][currentColumn];
+    const pieceHistory = piece.history;
+    piece.history = [
+      ...pieceHistory,
+      {
+        row: currentRow,
+        column: currentColumn
+      }
+    ];
     board[currentRow][currentColumn] = newTile();
     board[nextRow][nextColumn] = piece;
     return this.setState({

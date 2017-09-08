@@ -1,5 +1,6 @@
 ## TO DO
 
+- Implement castling
 - Identify a check
 - Identify a stalemate
 - Highlight red, pieces that can be taken
