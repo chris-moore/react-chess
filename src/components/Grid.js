@@ -32,7 +32,7 @@ function generateBoard() {
     [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
     [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
     [newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W')],
-    [newTile('r', 'W'), newTile('n', 'W'), newTile('b', 'W'), newTile('q', 'W'), newTile('k', 'W'), newTile('b', 'W'), newTile('n', 'W'), newTile('r', 'W')]
+    [newTile('r', 'W'), newTile(), newTile(), newTile(), newTile('k', 'W'), newTile('b', 'W'), newTile('n', 'W'), newTile('r', 'W')]
   ];
 }
 
@@ -53,7 +53,10 @@ class Grid extends Component {
   movePiece(board, currentRow, currentColumn, nextRow, nextColumn, turn) {
     const previousHistory = this.state.history;
     const piece = board[currentRow][currentColumn];
+    const nextSquare = board[nextRow][nextColumn];
     const pieceHistory = piece.history;
+    let boardHistoryRow = nextRow;
+    let boardHistoryColumn = nextColumn;
     piece.history = [
       ...pieceHistory,
       {
@@ -61,8 +64,26 @@ class Grid extends Component {
         column: currentColumn
       }
     ];
-    board[currentRow][currentColumn] = newTile();
-    board[nextRow][nextColumn] = piece;
+    // this is a castle
+    if (piece.type === 'k' && nextSquare.player === piece.player) {
+      const castleColumns = nextColumn === 0 ? { rook: 3, king: 2 } : { rook: 5, king: 6 };
+      const rookHistory = nextSquare.history;
+      nextSquare.history = [
+        ...rookHistory,
+        {
+          column: castleColumns.rook,
+          row: currentRow
+        }
+      ];
+      board[currentRow][castleColumns.rook] = nextSquare;
+      board[currentRow][castleColumns.king] = piece;
+      board[currentRow][currentColumn] = newTile();
+      board[nextRow][nextColumn] = newTile();
+    } else {
+      board[currentRow][currentColumn] = newTile();
+      board[nextRow][nextColumn] = piece;
+    }
+
     return this.setState({
       selectedSquare: {
         column: null,
@@ -167,7 +188,7 @@ class Grid extends Component {
             })
           }
         </div>
-        <div className="absolute-l top-0 left-0 pa4">
+        <div className="absolute-l top-0 left-0 pa4 code gray">
           {history.map(item => <div key={uuid()}>{item.player}: {item.type} {item.row} {item.column}</div>)}
         </div>
       </div>

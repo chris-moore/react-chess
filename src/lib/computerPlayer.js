@@ -1,34 +1,12 @@
 import filter from 'lodash/filter';
 import flatten from 'lodash/flatten';
 import Validator from './validator';
-
-function randomize(a) {
-	let i = a.length;
-	if (i == 0) {
-		return null;
-	}
-	while (--i) {
-		let j = Math.floor(Math.random() * (i + 1));
-		let tmp1 = a[i];
-		let tmp2 = a[j];
-		a[i] = tmp2;
-		a[j] = tmp1;
-	}
-	return a;
-}
+import { randomize, getPiecesWithIndex } from './Helper';
 
 function makeDumbMove(board, player) {
   console.log('[ComputerPlayer.makeDumbMove] board: ', board);
   console.log('[ComputerPlayer.makeDumbMove] player: ', player);
-  const piecesWithIndex = board.map((row, indexY) => {
-    return row.map((tile, indexX) => {
-      return {
-        ...tile,
-        row: indexY,
-        column: indexX
-      }
-    });
-  });
+  const piecesWithIndex = getPiecesWithIndex(board);
   const pieces = filter(flatten(piecesWithIndex), { player });
   console.log('[ComputerPlayer.makeDumbMove] pieces: ', randomize(pieces));
   const totalPieces = pieces.length;

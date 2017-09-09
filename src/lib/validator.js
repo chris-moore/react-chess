@@ -1,7 +1,9 @@
 import inRange from 'lodash/inRange';
-function onBoard(coordinate) {
-  return inRange(coordinate, 0, 8);
-}
+import filter from 'lodash/filter';
+import flatten from 'lodash/flatten';
+import every from 'lodash/every';
+import { onBoard, getPiecesWithIndex } from './Helper';
+
 function pawnMoves(piece, board, row, column) {
   const direction = piece.player === 'W' ? -1 : 1;
   const forwardRow = row + direction;
@@ -112,6 +114,25 @@ function kingMoves(piece, board, row, column) {
   const left = moveDirection(piece, board, row, column, -1, 0, true);
   const right = moveDirection(piece, board, row, column, 1, 0, true);
   const down = moveDirection(piece, board, row, column, 0, 1, true);
+  const kingNotMoved = !piece.history.length;
+  let castles = [];
+  if (kingNotMoved) {
+    const indexBoard = getPiecesWithIndex(board);
+    const playerRooks = filter(flatten(indexBoard), { player: piece.player, type: 'r' });
+    console.log('[Validator.kingMoves] kingNotMoved: ' + kingNotMoved + ' playerRooks: ', playerRooks);
+    castles = playerRooks.map((rookObj) => {
+      if (!rookObj.history.length) {
+        const kingRow = indexBoard[rookObj.row];
+        const rookColumn = rookObj.column;
+        const itemsBetween = rookColumn === 0 ? [kingRow[1], kingRow[2], kingRow[3]] : [kingRow[5], kingRow[6]];
+        if (every(itemsBetween, {type: null})) {
+          return { column: rookObj.column, row: rookObj.row }
+        }
+      }
+    });
+  }
+
+
   return [
     ...up,
     ...left,
@@ -120,7 +141,8 @@ function kingMoves(piece, board, row, column) {
     ...upLeft,
     ...upRight,
     ...downLeft,
-    ...downRight
+    ...downRight,
+    ...castles
   ];
 }
 
