@@ -147,6 +147,10 @@ function kingMoves(piece, board, row, column) {
 }
 
 export default class Validator {
+  static isCheck(board) {
+    
+    return false;
+  }
   static validMoves(piece, board, row, column) {
     //console.log('[Validator.validMoves] row: ' + row + ' column: ' + column + ' board: ', board);
     let moves = null;

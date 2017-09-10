@@ -26,13 +26,24 @@ function newTile(type = null, player) {
 function generateBoard() {
   return [
     [newTile('r', 'B'), newTile('n', 'B'), newTile('b', 'B'), newTile('q', 'B'), newTile('k', 'B'), newTile('b', 'B'), newTile('n', 'B'), newTile('r', 'B')],
+    [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
+    [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
+    [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
+    [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
+    [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
+    [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
+    [newTile('r', 'W'), newTile('n', 'W'), newTile('b', 'W'), newTile('q', 'W'), newTile('k', 'W'), newTile('b', 'W'), newTile('n', 'W'), newTile('r', 'W')]
+  ];
+  // standard board
+  return [
+    [newTile('r', 'B'), newTile('n', 'B'), newTile('b', 'B'), newTile('q', 'B'), newTile('k', 'B'), newTile('b', 'B'), newTile('n', 'B'), newTile('r', 'B')],
     [newTile('p', 'B'), newTile('p', 'B'), newTile('p', 'B'), newTile('p', 'B'), newTile('p', 'B'), newTile('p', 'B'), newTile('p', 'B'), newTile('p', 'B')],
     [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
     [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
     [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
     [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
     [newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W')],
-    [newTile('r', 'W'), newTile(), newTile(), newTile(), newTile('k', 'W'), newTile('b', 'W'), newTile('n', 'W'), newTile('r', 'W')]
+    [newTile('r', 'W'), newTile('n', 'W'), newTile('b', 'W'), newTile('q', 'W'), newTile('k', 'W'), newTile('b', 'W'), newTile('n', 'W'), newTile('r', 'W')]
   ];
 }
 
@@ -42,13 +53,53 @@ class Grid extends Component {
 
     this.state = {
       board: generateBoard(),
-      turn: 'W',
-      selectedSquare: { column: null, row: null },
-      moves: null,
-      human: 'W',
+      check: false,
       computer: 'B',
-      history: []
+      history: [],
+      human: 'W',
+      moves: null,
+      selectedSquare: { column: null, row: null },
+      turn: 'W',
     }
+  }
+  componentDidMount() {
+    const { board, computer, turn } = this.state;
+    if (turn === computer) {
+      this.doComputerMove(board, computer, turn);
+    }
+  }
+  doCastle(board, piece, currentRow, currentColumn, nextColumn, nextSquare) {
+    const castleColumns = nextColumn === 0 ? { rook: 3, king: 2 } : { rook: 5, king: 6 };
+    const rookHistory = nextSquare.history;
+    nextSquare.history = [
+      ...rookHistory,
+      {
+        column: castleColumns.rook,
+        row: currentRow
+      }
+    ];
+    board[currentRow][castleColumns.rook] = nextSquare;
+    board[currentRow][castleColumns.king] = piece;
+    board[currentRow][currentColumn] = newTile();
+    board[currentRow][nextColumn] = newTile();
+
+    return board;
+  }
+  doComputerMove(board, computer, turn) {
+    delay(() => {
+      const cpMove = ComputerPlayer.makeMove(board, computer);
+      this.movePiece(
+        board,
+        cpMove.currentRow,
+        cpMove.currentColumn,
+        cpMove.nextRow,
+        cpMove.nextColumn,
+        turn
+      );
+      this.setState({
+        turn: this.state.human
+      });
+    }, 800);
   }
   movePiece(board, currentRow, currentColumn, nextRow, nextColumn, turn) {
     const previousHistory = this.state.history;
@@ -64,34 +115,20 @@ class Grid extends Component {
         column: currentColumn
       }
     ];
-    // this is a castle
+    // castling
     if (piece.type === 'k' && nextSquare.player === piece.player) {
-      const castleColumns = nextColumn === 0 ? { rook: 3, king: 2 } : { rook: 5, king: 6 };
-      const rookHistory = nextSquare.history;
-      nextSquare.history = [
-        ...rookHistory,
-        {
-          column: castleColumns.rook,
-          row: currentRow
-        }
-      ];
-      board[currentRow][castleColumns.rook] = nextSquare;
-      board[currentRow][castleColumns.king] = piece;
-      board[currentRow][currentColumn] = newTile();
-      board[nextRow][nextColumn] = newTile();
+      board = this.doCastle(board, piece, currentRow, currentColumn, nextColumn, nextSquare);
     } else {
       board[currentRow][currentColumn] = newTile();
       board[nextRow][nextColumn] = piece;
     }
 
+    // check for check
+    const check = Validator.isCheck(board);
+
     return this.setState({
-      selectedSquare: {
-        column: null,
-        row: null
-      },
-      moves: null,
       board,
-      turn: turn === 'W' ? 'B' : 'W',
+      check,
       history: [
         ...previousHistory,
         {
@@ -100,7 +137,13 @@ class Grid extends Component {
           player: piece.player,
           type: piece.type
         }
-      ]
+      ],
+      moves: null,
+      selectedSquare: {
+        column: null,
+        row: null
+      },
+      turn: turn === 'W' ? 'B' : 'W',
     });
   }
   clickSquare(tile, clickRow, clickColumn, move) {
@@ -113,17 +156,7 @@ class Grid extends Component {
       this.movePiece(board, row, column, clickRow, clickColumn, turn);
 
       // do computer move right after
-      delay(() => {
-        const cpMove = ComputerPlayer.makeMove(board, computer);
-        this.movePiece(
-          board,
-          cpMove.currentRow,
-          cpMove.currentColumn,
-          cpMove.nextRow,
-          cpMove.nextColumn,
-          this.state.turn
-        );
-      }, 1000);
+      this.doComputerMove(board, computer, this.state.turn);
       return;
     }
 
@@ -148,12 +181,13 @@ class Grid extends Component {
     });
   }
   render() {
-    const { board, history, human, moves, selectedSquare, turn } = this.state;
+    const { board, check, history, human, moves, selectedSquare, turn } = this.state;
     const playerTurn = turn === 'W' ? 'White to move' : 'Black to move';
+    const checkStr = check ? 'CHECK!' : null;
 
     return (
       <div className="grid relative">
-        <h3>{playerTurn}</h3>
+        <h3>{playerTurn} {checkStr}</h3>
         <div className="mv4 center tc ">
           {
             board.map((row, indexRow) => {
