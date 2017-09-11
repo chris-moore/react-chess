@@ -1,9 +1,9 @@
 import filter from 'lodash/filter';
 import flatten from 'lodash/flatten';
-import Validator from './validator';
+import { validMoves } from './validator';
 import { randomize, getPiecesWithIndex } from './Helper';
 
-function makeDumbMove(board, player) {
+function makeDumbMove(board, player, check = false) {
   console.log('[ComputerPlayer.makeDumbMove] board: ', board);
   console.log('[ComputerPlayer.makeDumbMove] player: ', player);
   const piecesWithIndex = getPiecesWithIndex(board);
@@ -17,7 +17,7 @@ function makeDumbMove(board, player) {
   do {
     currentPiece = pieces[currentIndex];
     const { row, column } = currentPiece;
-    const moves = Validator.validMoves(currentPiece, board, row, column);
+    const moves = validMoves(currentPiece, board, row, column, check);
     if (moves.length) {
       console.log('[ComputerPlayer.makeDumbMove] currentPiece: ', currentPiece);
       validMove = moves[0];
@@ -36,13 +36,13 @@ function makeDumbMove(board, player) {
 }
 
 export default class ComputerPlayer {
-  static makeMove(board, player) {
+  static makeMove(board, player, check) {
 
     // Phase 1: select a random piece with moves, do one
     // Phase 2: find all moves for all pieces, do one
     // Phase 3: phase two, then take a piece, if available
     // Phase 4: phase two, then take higher ranked piece, otherwise defend by moving away
 
-    return makeDumbMove(board, player);
+    return makeDumbMove(board, player, check);
   }
 }

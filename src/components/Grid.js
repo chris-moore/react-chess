@@ -1,51 +1,11 @@
 import React, { Component } from 'react';
-import Validator from '../lib/validator';
+import { doCastle, doMove, generateBoard, isCheck, newTile, validMoves } from '../lib/validator';
 import ComputerPlayer from '../lib/computerPlayer';
 import delay from 'lodash/delay';
 import find from 'lodash/find';
 import filter from 'lodash/filter';
 import isMatch from 'lodash/isMatch';
 import { v4 as uuid } from 'uuid';
-
-function newTile(type = null, player) {
-  const color = player === 'B' ? 'black' : 'white';
-  const dom = (
-    <div
-      className={`f1-l f3 mt1 mt2-l ${color} icon-${type}`}
-      onClick={() => console.log('[Grid.newTile] type: ', type)}
-    ></div>
-  );
-  return {
-    type,
-    player,
-    history: [],
-    dom
-  }
-}
-
-function generateBoard() {
-  return [
-    [newTile('r', 'B'), newTile('n', 'B'), newTile('b', 'B'), newTile('q', 'B'), newTile('k', 'B'), newTile('b', 'B'), newTile('n', 'B'), newTile('r', 'B')],
-    [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
-    [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
-    [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
-    [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
-    [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
-    [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
-    [newTile('r', 'W'), newTile('n', 'W'), newTile('b', 'W'), newTile('q', 'W'), newTile('k', 'W'), newTile('b', 'W'), newTile('n', 'W'), newTile('r', 'W')]
-  ];
-  // standard board
-  return [
-    [newTile('r', 'B'), newTile('n', 'B'), newTile('b', 'B'), newTile('q', 'B'), newTile('k', 'B'), newTile('b', 'B'), newTile('n', 'B'), newTile('r', 'B')],
-    [newTile('p', 'B'), newTile('p', 'B'), newTile('p', 'B'), newTile('p', 'B'), newTile('p', 'B'), newTile('p', 'B'), newTile('p', 'B'), newTile('p', 'B')],
-    [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
-    [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
-    [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
-    [newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile(), newTile()],
-    [newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W'), newTile('p', 'W')],
-    [newTile('r', 'W'), newTile('n', 'W'), newTile('b', 'W'), newTile('q', 'W'), newTile('k', 'W'), newTile('b', 'W'), newTile('n', 'W'), newTile('r', 'W')]
-  ];
-}
 
 class Grid extends Component {
   constructor(props) {
@@ -68,26 +28,10 @@ class Grid extends Component {
       this.doComputerMove(board, computer, turn);
     }
   }
-  doCastle(board, piece, currentRow, currentColumn, nextColumn, nextSquare) {
-    const castleColumns = nextColumn === 0 ? { rook: 3, king: 2 } : { rook: 5, king: 6 };
-    const rookHistory = nextSquare.history;
-    nextSquare.history = [
-      ...rookHistory,
-      {
-        column: castleColumns.rook,
-        row: currentRow
-      }
-    ];
-    board[currentRow][castleColumns.rook] = nextSquare;
-    board[currentRow][castleColumns.king] = piece;
-    board[currentRow][currentColumn] = newTile();
-    board[currentRow][nextColumn] = newTile();
-
-    return board;
-  }
-  doComputerMove(board, computer, turn) {
+  doComputerMove(board, computer, turn, check = false) {
+    const moveDelay = check ? 10 : 800;
     delay(() => {
-      const cpMove = ComputerPlayer.makeMove(board, computer);
+      const cpMove = ComputerPlayer.makeMove(board, computer, check);
       this.movePiece(
         board,
         cpMove.currentRow,
@@ -99,34 +43,16 @@ class Grid extends Component {
       this.setState({
         turn: this.state.human
       });
-    }, 800);
+    }, moveDelay);
   }
-  movePiece(board, currentRow, currentColumn, nextRow, nextColumn, turn) {
+  movePiece(currentBoard, currentRow, currentColumn, nextRow, nextColumn, turn) {
     const previousHistory = this.state.history;
-    const piece = board[currentRow][currentColumn];
-    const nextSquare = board[nextRow][nextColumn];
-    const pieceHistory = piece.history;
-    let boardHistoryRow = nextRow;
-    let boardHistoryColumn = nextColumn;
-    piece.history = [
-      ...pieceHistory,
-      {
-        row: currentRow,
-        column: currentColumn
-      }
-    ];
-    // castling
-    if (piece.type === 'k' && nextSquare.player === piece.player) {
-      board = this.doCastle(board, piece, currentRow, currentColumn, nextColumn, nextSquare);
-    } else {
-      board[currentRow][currentColumn] = newTile();
-      board[nextRow][nextColumn] = piece;
-    }
+    const piece = currentBoard[currentRow][currentColumn];
+    const board = doMove(currentBoard, currentRow, currentColumn, nextRow, nextColumn);
 
     // check for check
-    const check = Validator.isCheck(board);
-
-    return this.setState({
+    const check = isCheck(board, turn);
+    const nextState = {
       board,
       check,
       history: [
@@ -144,7 +70,10 @@ class Grid extends Component {
         row: null
       },
       turn: turn === 'W' ? 'B' : 'W',
-    });
+    }
+
+    this.setState(nextState);
+    return nextState;
   }
   clickSquare(tile, clickRow, clickColumn, move) {
     const { player, type } = tile;
@@ -153,10 +82,10 @@ class Grid extends Component {
 
     // move a piece
     if (move && selectedSquare && turn === human) {
-      this.movePiece(board, row, column, clickRow, clickColumn, turn);
-
+      const nextState = this.movePiece(board, row, column, clickRow, clickColumn, turn);
+      console.log('[Grid.clickSquare] nextState: ', nextState);
       // do computer move right after
-      this.doComputerMove(board, computer, this.state.turn);
+      this.doComputerMove(board, computer, this.state.turn, nextState.check);
       return;
     }
 
@@ -173,7 +102,7 @@ class Grid extends Component {
 
     // select a piece
     return this.setState({
-      moves: Validator.validMoves(tile, board, clickRow, clickColumn),
+      moves: validMoves(tile, board, clickRow, clickColumn),
       selectedSquare: {
         column: clickColumn,
         row: clickRow
@@ -213,7 +142,9 @@ class Grid extends Component {
                         onClick={() => this.clickSquare(tile, indexRow, indexColumn, move)}
                         className={`dib f7 w3-l w2 h3-l h2 v-mid ba b--white ${bgColor} ma0 ${playerStyle}`}
                       >
-                        {tile.dom}
+                        <div
+                          className={`f1-l f3 mt1 mt2-l ${tile.color} icon-${tile.type}`}
+                        ></div>
                       </div>
                     )}
                   )}
